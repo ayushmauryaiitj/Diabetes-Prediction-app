@@ -95,14 +95,14 @@ st.markdown("""
 # =========================
 st.sidebar.title("🩺 Patient Information")
 
-pregnancies = st.sidebar.number_input("Pregnancies", 0, 20, 1)
-glucose = st.sidebar.number_input("Glucose Level", 0, 200, 100)
-blood_pressure = st.sidebar.number_input("Blood Pressure", 0, 140, 70)
-skin_thickness = st.sidebar.number_input("Skin Thickness", 0, 100, 20)
-insulin = st.sidebar.number_input("Insulin Level", 0, 900, 80)
-bmi = st.sidebar.number_input("BMI", 0.0, 70.0, 25.0)
-dpf = st.sidebar.number_input("Diabetes Pedigree", 0.0, 3.0, 0.5)
-age = st.sidebar.number_input("Age", 1, 100, 25)
+pregnancies = st.sidebar.slider("Pregnancies", 0, 20, 1)
+glucose = st.sidebar.slider("Glucose Level", 0, 200, 100)
+blood_pressure = st.sidebar.slider("Blood Pressure", 0, 140, 70)
+skin_thickness = st.sidebar.slider("Skin Thickness", 0, 100, 20)
+insulin = st.sidebar.slider("Insulin Level", 0, 900, 80)
+bmi = st.sidebar.slider("BMI", 0.0, 70.0, 25.0)
+dpf = st.sidebar.slider("Diabetes Pedigree", 0.0, 3.0, 0.5)
+age = st.sidebar.slider("Age", 1, 100, 25)
 
 # =========================
 # HEADER
@@ -150,9 +150,9 @@ with col4:
 st.write("")
 
 # =========================
-# MAIN SECTIONS
+# MAIN SECTION
 # =========================
-left, right = st.columns([1.2, 1])
+left, right = st.columns([1.3, 1])
 
 # =========================
 # HEALTH SUMMARY
@@ -200,9 +200,6 @@ with right:
     if st.button("Predict Diabetes Risk"):
 
         prediction = model.predict(scaled_data)
-        probability = model.predict_proba(scaled_data)
-
-        confidence = round(np.max(probability) * 100, 2)
 
         if prediction[0] == 0:
 
@@ -225,8 +222,6 @@ with right:
             """, unsafe_allow_html=True)
 
             st.error("Patient may have diabetes risk.")
-
-        st.info(f"Prediction Confidence: {confidence}%")
 
 # =========================
 # FOOTER
