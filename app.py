@@ -3,112 +3,168 @@ import pickle
 import numpy as np
 import pandas as pd
 
-# Page Config
+# CONFIG
 st.set_page_config(
-    page_title="Diabetes Prediction Dashboard",
+    page_title="AI Diabetes Dashboard",
     page_icon="🩺",
     layout="wide"
 )
 
-# Load model and scaler
-model = pickle.load(open('saved_model.sav', 'rb'))
-scaler = pickle.load(open('scaler.sav', 'rb'))
+# LOAD MODEL
+model = pickle.load(open("saved_model.sav", "rb"))
+scaler = pickle.load(open("scaler.sav", "rb"))
 
-# Custom CSS
+# CUSTOM CSS
 st.markdown("""
-    <style>
-    .main {
-        background-color: #0E1117;
-    }
+<style>
 
-    .stButton>button {
-        background-color: #FF4B4B;
-        color: white;
-        border-radius: 10px;
-        height: 3em;
-        width: 100%;
-        font-size: 18px;
-        font-weight: bold;
-    }
+[data-testid="stAppViewContainer"]{
+    background-color:#0f172a;
+    color:white;
+}
 
-    .prediction-box {
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-    }
-    </style>
+[data-testid="stSidebar"]{
+    background-color:#111827;
+}
+
+.metric-card {
+    background: linear-gradient(135deg,#1e293b,#0f172a);
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
+}
+
+.result-success{
+    background:#14532d;
+    padding:20px;
+    border-radius:12px;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.result-danger{
+    background:#7f1d1d;
+    padding:20px;
+    border-radius:12px;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.stButton>button{
+    width:100%;
+    height:60px;
+    background:linear-gradient(90deg,#2563eb,#7c3aed);
+    color:white;
+    border:none;
+    border-radius:12px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
-# Title
-st.title("🩺 Diabetes Prediction Dashboard")
-st.write("AI-powered Machine Learning application for diabetes risk prediction.")
+# TITLE
+st.title("🩺 AI Diabetes Prediction Dashboard")
+st.write("Advanced Machine Learning system for predicting diabetes risk.")
 
-# Sidebar
-st.sidebar.header("Patient Information")
+# SIDEBAR
+st.sidebar.title("📋 Patient Details")
 
-pregnancies = st.sidebar.number_input("Pregnancies", 0.0)
-glucose = st.sidebar.number_input("Glucose Level", 0.0)
-blood_pressure = st.sidebar.number_input("Blood Pressure", 0.0)
-skin_thickness = st.sidebar.number_input("Skin Thickness", 0.0)
-insulin = st.sidebar.number_input("Insulin Level", 0.0)
-bmi = st.sidebar.number_input("BMI", 0.0)
-diabetes_pedigree = st.sidebar.number_input("Diabetes Pedigree Function", 0.0)
-age = st.sidebar.number_input("Age", 0.0)
+pregnancies = st.sidebar.slider("Pregnancies",0,20,1)
+glucose = st.sidebar.slider("Glucose",0,200,100)
+blood_pressure = st.sidebar.slider("Blood Pressure",0,140,70)
+skin_thickness = st.sidebar.slider("Skin Thickness",0,100,20)
+insulin = st.sidebar.slider("Insulin",0,900,80)
+bmi = st.sidebar.slider("BMI",0.0,70.0,25.0)
+dpf = st.sidebar.slider("Diabetes Pedigree",0.0,3.0,0.5)
+age = st.sidebar.slider("Age",1,100,25)
 
-# Layout
-col1, col2, col3 = st.columns(3)
+# METRICS
+col1,col2,col3,col4 = st.columns(4)
 
 with col1:
-    st.metric("Glucose", glucose)
+    st.markdown(f"""
+    <div class="metric-card">
+    <h3>Glucose</h3>
+    <h1>{glucose}</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    st.metric("BMI", bmi)
+    st.markdown(f"""
+    <div class="metric-card">
+    <h3>BMI</h3>
+    <h1>{bmi}</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    st.metric("Age", age)
+    st.markdown(f"""
+    <div class="metric-card">
+    <h3>Age</h3>
+    <h1>{age}</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Prediction
-if st.button("Predict Diabetes"):
+with col4:
+    st.markdown(f"""
+    <div class="metric-card">
+    <h3>Insulin</h3>
+    <h1>{insulin}</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
-    input_data = np.array([
-        pregnancies,
-        glucose,
-        blood_pressure,
-        skin_thickness,
-        insulin,
-        bmi,
-        diabetes_pedigree,
-        age
-    ]).reshape(1, -1)
+st.markdown("## 📊 Health Analytics")
 
-    std_data = scaler.transform(input_data)
+chart_data = pd.DataFrame({
+    "Feature":["Glucose","BP","BMI","Insulin"],
+    "Value":[glucose,blood_pressure,bmi,insulin]
+})
 
-    prediction = model.predict(std_data)
+st.bar_chart(chart_data.set_index("Feature"))
 
-    st.subheader("Prediction Result")
+# PREDICTION
+input_data = np.array([
+    pregnancies,
+    glucose,
+    blood_pressure,
+    skin_thickness,
+    insulin,
+    bmi,
+    dpf,
+    age
+]).reshape(1,-1)
+
+scaled_data = scaler.transform(input_data)
+
+if st.button("🚀 Predict Diabetes Risk"):
+
+    prediction = model.predict(scaled_data)
 
     if prediction[0] == 0:
-        st.success("✅ The person is NOT diabetic")
 
-        st.info("""
-        ### Health Suggestions
-        - Maintain healthy diet
-        - Exercise regularly
-        - Monitor glucose levels periodically
-        """)
+        st.markdown("""
+        <div class="result-success">
+        ✅ LOW DIABETES RISK
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.success("Healthy indicators detected.")
 
     else:
-        st.error("⚠️ The person IS diabetic")
 
-        st.warning("""
-        ### Medical Recommendations
-        - Consult a healthcare professional
-        - Follow proper medication
-        - Maintain strict diet control
-        """)
+        st.markdown("""
+        <div class="result-danger">
+        ⚠️ HIGH DIABETES RISK
+        </div>
+        """, unsafe_allow_html=True)
 
-# Footer
+        st.error("Consult a healthcare professional.")
+
+# FOOTER
 st.markdown("---")
-st.caption("Built with Streamlit, Scikit-learn and Machine Learning")
+st.caption("Built using Streamlit • Scikit-learn • SVM Classifier • Machine Learning")
