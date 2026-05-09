@@ -113,4 +113,4 @@ BS in Applied AI & Data Science @ IIT Jodhpur
 https://github.com/ayushmauryaiitj
 
 🔗 LinkedIn:  
-https://www.linkedin.com/in/ayushmauryaii/
+https://www.linkedin.com/in/ayushmauryaiitj
