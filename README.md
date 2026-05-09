@@ -62,7 +62,8 @@ https://diabetes-prediction-app-ayush.streamlit.app/
 
 ## 📷 Dashboard Preview
 
-![Dashboard Preview](dashboard.png)
+![Low Risk Dashboard](low-risk.png)
+![High Risk Dashboard](high-risk.png)
 
 ---
 
