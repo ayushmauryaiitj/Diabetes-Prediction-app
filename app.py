@@ -2,10 +2,11 @@ import streamlit as st
 import pickle
 import numpy as np
 import pandas as pd
+import plotly.express as px
 
-# CONFIG
+# PAGE CONFIG
 st.set_page_config(
-    page_title="AI Diabetes Dashboard",
+    page_title="Diabetes AI Dashboard",
     page_icon="🩺",
     layout="wide"
 )
@@ -18,70 +19,76 @@ scaler = pickle.load(open("scaler.sav", "rb"))
 st.markdown("""
 <style>
 
-[data-testid="stAppViewContainer"]{
-    background-color:#0f172a;
-    color:white;
+.main {
+    background-color: #f5f7fb;
 }
 
-[data-testid="stSidebar"]{
-    background-color:#111827;
+[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    border-right:1px solid #e5e7eb;
+}
+
+.block-container {
+    padding-top: 2rem;
 }
 
 .metric-card {
-    background: linear-gradient(135deg,#1e293b,#0f172a);
-    padding:20px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 0 10px rgba(0,0,0,0.4);
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
 }
 
-.result-success{
-    background:#14532d;
-    padding:20px;
-    border-radius:12px;
-    color:white;
-    font-size:24px;
-    font-weight:bold;
+.metric-title {
+    font-size:18px;
+    color:#6b7280;
+    margin-bottom:10px;
 }
 
-.result-danger{
-    background:#7f1d1d;
-    padding:20px;
-    border-radius:12px;
-    color:white;
-    font-size:24px;
-    font-weight:bold;
+.metric-value {
+    font-size:42px;
+    font-weight:700;
+    color:#111827;
 }
 
-.stButton>button{
+.stButton>button {
     width:100%;
-    height:60px;
-    background:linear-gradient(90deg,#2563eb,#7c3aed);
+    background:#2563eb;
     color:white;
     border:none;
     border-radius:12px;
-    font-size:20px;
+    height:55px;
+    font-size:18px;
+    font-weight:600;
+}
+
+.result-box {
+    padding:20px;
+    border-radius:15px;
+    font-size:24px;
     font-weight:bold;
+    text-align:center;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# TITLE
-st.title("🩺 AI Diabetes Prediction Dashboard")
-st.write("Advanced Machine Learning system for predicting diabetes risk.")
-
 # SIDEBAR
-st.sidebar.title("📋 Patient Details")
+st.sidebar.title("🩺 Patient Information")
 
 pregnancies = st.sidebar.slider("Pregnancies",0,20,1)
-glucose = st.sidebar.slider("Glucose",0,200,100)
+glucose = st.sidebar.slider("Glucose Level",0,200,100)
 blood_pressure = st.sidebar.slider("Blood Pressure",0,140,70)
 skin_thickness = st.sidebar.slider("Skin Thickness",0,100,20)
-insulin = st.sidebar.slider("Insulin",0,900,80)
+insulin = st.sidebar.slider("Insulin Level",0,900,80)
 bmi = st.sidebar.slider("BMI",0.0,70.0,25.0)
 dpf = st.sidebar.slider("Diabetes Pedigree",0.0,3.0,0.5)
 age = st.sidebar.slider("Age",1,100,25)
+
+# HEADER
+st.title("🩺 Diabetes Prediction Dashboard")
+st.write("AI-powered Machine Learning application for diabetes risk analysis.")
 
 # METRICS
 col1,col2,col3,col4 = st.columns(4)
@@ -89,82 +96,108 @@ col1,col2,col3,col4 = st.columns(4)
 with col1:
     st.markdown(f"""
     <div class="metric-card">
-    <h3>Glucose</h3>
-    <h1>{glucose}</h1>
+        <div class="metric-title">Glucose</div>
+        <div class="metric-value">{glucose}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown(f"""
     <div class="metric-card">
-    <h3>BMI</h3>
-    <h1>{bmi}</h1>
+        <div class="metric-title">BMI</div>
+        <div class="metric-value">{bmi}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
     st.markdown(f"""
     <div class="metric-card">
-    <h3>Age</h3>
-    <h1>{age}</h1>
+        <div class="metric-title">Age</div>
+        <div class="metric-value">{age}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col4:
     st.markdown(f"""
     <div class="metric-card">
-    <h3>Insulin</h3>
-    <h1>{insulin}</h1>
+        <div class="metric-title">Insulin</div>
+        <div class="metric-value">{insulin}</div>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("## 📊 Health Analytics")
+st.write("")
 
-chart_data = pd.DataFrame({
-    "Feature":["Glucose","BP","BMI","Insulin"],
-    "Value":[glucose,blood_pressure,bmi,insulin]
-})
+# ANALYTICS SECTION
+left,right = st.columns([1.2,1])
 
-st.bar_chart(chart_data.set_index("Feature"))
+# DONUT CHART
+with left:
 
-# PREDICTION
-input_data = np.array([
-    pregnancies,
-    glucose,
-    blood_pressure,
-    skin_thickness,
-    insulin,
-    bmi,
-    dpf,
-    age
-]).reshape(1,-1)
+    st.subheader("📊 Health Analytics")
 
-scaled_data = scaler.transform(input_data)
+    df = pd.DataFrame({
+        "Feature":["Glucose","Blood Pressure","BMI","Insulin"],
+        "Value":[glucose,blood_pressure,bmi,insulin]
+    })
 
-if st.button("🚀 Predict Diabetes Risk"):
+    fig = px.pie(
+        df,
+        names="Feature",
+        values="Value",
+        hole=0.6
+    )
 
-    prediction = model.predict(scaled_data)
+    fig.update_layout(
+        height=420,
+        paper_bgcolor='white',
+        plot_bgcolor='white'
+    )
 
-    if prediction[0] == 0:
+    st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("""
-        <div class="result-success">
-        ✅ LOW DIABETES RISK
-        </div>
-        """, unsafe_allow_html=True)
+# RISK PANEL
+with right:
 
-        st.success("Healthy indicators detected.")
+    st.subheader("🧠 Prediction Panel")
 
-    else:
+    input_data = np.array([
+        pregnancies,
+        glucose,
+        blood_pressure,
+        skin_thickness,
+        insulin,
+        bmi,
+        dpf,
+        age
+    ]).reshape(1,-1)
 
-        st.markdown("""
-        <div class="result-danger">
-        ⚠️ HIGH DIABETES RISK
-        </div>
-        """, unsafe_allow_html=True)
+    scaled_data = scaler.transform(input_data)
 
-        st.error("Consult a healthcare professional.")
+    if st.button("Predict Diabetes Risk"):
+
+        prediction = model.predict(scaled_data)
+
+        if prediction[0] == 0:
+
+            st.markdown("""
+            <div class="result-box" style="background:#dcfce7;color:#166534;">
+            ✅ LOW RISK
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.success("Patient indicators appear healthy.")
+
+        else:
+
+            st.markdown("""
+            <div class="result-box" style="background:#fee2e2;color:#991b1b;">
+            ⚠️ HIGH RISK
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.error("Patient may have diabetes risk.")
 
 # FOOTER
+st.write("")
 st.markdown("---")
-st.caption("Built using Streamlit • Scikit-learn • SVM Classifier • Machine Learning")
+st.caption("Built with Streamlit • Scikit-learn • SVM • Machine Learning")
